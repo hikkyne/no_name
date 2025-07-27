@@ -170,6 +170,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
       year: selectedYear,
       ...newFilters,
     };
+    // Ensure we clean up undefined values
+    Object.keys(allFilters).forEach(key => {
+      if (allFilters[key] === undefined || allFilters[key] === "") {
+        delete allFilters[key];
+      }
+    });
     onFiltersChange(allFilters);
   };
 

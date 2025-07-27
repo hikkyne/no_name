@@ -15,12 +15,12 @@ import useSWRInfinite from "swr/infinite";
 export interface UseBrowseOptions {
   keyword?: string;
   genres?: string[];
-  format?: MediaFormat;
+  format?: MediaFormat | string;
   limit?: number;
   tags?: string[];
   sort?: MediaSort;
   country?: string;
-  status?: MediaStatus;
+  status?: MediaStatus | string;
   isAdult?: boolean;
   year?: number;
   seasonYear?: number;
@@ -123,25 +123,41 @@ const useBrowse = (options: UseBrowseOptions) => {
       const mappedSort = sort
         ? mapSortToMediaSort(sort)
         : MediaSortEnum.Popularity;
-      const mappedFormat = type ? mapTypeToMediaFormat(type) : format;
+      
+      // Handle format mapping - prioritize format if it's a string, otherwise use type
+      let mappedFormat: MediaFormat | undefined;
+      if (format && typeof format === 'string') {
+        mappedFormat = mapTypeToMediaFormat(format);
+      } else if (type) {
+        mappedFormat = mapTypeToMediaFormat(type);
+      } else {
+        mappedFormat = format;
+      }
+      
       const mappedCountry = country ? mapCountryToMediaCountry(country) : undefined;
-      const mappedStatus = status ? mapStatusToMediaStatus(status) : undefined;
+      
+      // Handle status mapping - convert string to enum if needed
+      let mappedStatus: MediaStatus | undefined;
+      if (status && typeof status === 'string') {
+        mappedStatus = mapStatusToMediaStatus(status);
+      } else {
+        mappedStatus = status as MediaStatus | undefined;
+      }
 
-      // console.log("Fetching manga with options:", {
-      //   type: MediaType.Manga,
-      //   format: mappedFormat,
-      //   perPage: limit,
-      //   countryOfOrigin: country,
-      //   sort: [mappedSort],
-      //   status: mappedStatus,
-      //   // season: mappedSeason,
-      //   page,
-      //   ...(tags.length && { tag_in: tags }),
-      //   ...(genres.length && { genre_in: genres }),
-      //   ...(keyword && { search: keyword }),
-      //   // isAdult:
-      //   //   isAdult || genres.includes("Hentai") || genres.includes("Ecchi"),
-      // });
+      console.log("Fetching manga with options:", {
+        type: MediaType.Manga,
+        format: mappedFormat,
+        perPage: limit,
+        countryOfOrigin: mappedCountry,
+        sort: [mappedSort],
+        status: mappedStatus,
+        year: year,
+        page,
+        ...(tags.length && { tag_in: tags }),
+        ...(genres.length && { genre_in: genres }),
+        ...(keyword && { search: keyword }),
+        isAdult: isAdult || genres.includes("Hentai") || genres.includes("Ecchi"),
+      });
 
       const result = await getPageMedia({
         type: MediaType.Manga,
@@ -151,8 +167,7 @@ const useBrowse = (options: UseBrowseOptions) => {
         sort: [mappedSort],
         status: mappedStatus,
         year: year,
-        // chổ page này tôi bị undefined fix kiểu gì đây?
-        page,
+        page: page || 1,
         ...(tags.length && { tag_in: tags }),
         ...(genres.length && { genre_in: genres }),
         ...(keyword && { search: keyword }),
