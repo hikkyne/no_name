@@ -114,6 +114,9 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
   const [selectedYear, setSelectedYear] = useState<number | null>(
     currentFilters.year || null,
   );
+  const [isAdult, setIsAdult] = useState<boolean>(
+    currentFilters.isAdult || false,
+  );
 
   const handleGenreToggle = (genre: string) => {
     const newGenres = selectedGenres.includes(genre)
@@ -160,6 +163,12 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
     updateFilters({ year: yearNum });
   };
 
+  const handleIsAdultChange = () => {
+    const newIsAdult = !isAdult;
+    setIsAdult(newIsAdult);
+    updateFilters({ isAdult: newIsAdult });
+  };
+
   const updateFilters = (newFilters: any) => {
     const allFilters = {
       genres: selectedGenres,
@@ -168,8 +177,15 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
       status: selectedStatus || undefined,
       country: selectedCountry || undefined,
       year: selectedYear,
+      isAdult: isAdult,
       ...newFilters,
     };
+    // Ensure we clean up undefined values
+    Object.keys(allFilters).forEach(key => {
+      if (allFilters[key] === undefined || allFilters[key] === "") {
+        delete allFilters[key];
+      }
+    });
     onFiltersChange(allFilters);
   };
 
@@ -180,6 +196,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
     setSelectedStatus("");
     setSelectedCountry("");
     setSelectedYear(null);
+    setIsAdult(false);
     onFiltersChange({
       genres: [],
       sort: "popularity",
@@ -192,7 +209,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
     selectedFormat ||
     selectedStatus ||
     selectedCountry ||
-    selectedYear;
+    selectedYear ||
+    isAdult;
 
   return (
     <div className="w-full">
@@ -208,7 +226,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 (selectedFormat ? 1 : 0) +
                 (selectedStatus ? 1 : 0) +
                 (selectedCountry ? 1 : 0) +
-                (selectedYear ? 1 : 0)}
+                (selectedYear ? 1 : 0) +
+                (isAdult ? 1 : 0)}
             </Badge>
           )}
         </div>
@@ -266,6 +285,16 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
               {selectedYear}
             </Badge>
           )}
+          {isAdult && (
+            <Badge 
+              variant="secondary" 
+              className="bg-red-600/80 text-white cursor-pointer"
+              onClick={handleIsAdultChange}
+            >
+              18+
+              <span className="ml-1 text-red-200">x</span>
+            </Badge>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -320,7 +349,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 </div>
 
                 {/* Right Column */}
-                <div className="grid grid-flow-col grid-cols-1 gap-4 lg:grid-rows-3">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 
                   <div>
                     <h3 className="mb-3 font-medium text-lg text-white">Sắp xếp</h3>
@@ -407,6 +436,22 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  {/* 18+ Toggle */}
+                  <div>
+                    <h3 className="mb-3 font-medium text-lg text-white">Nội dung 18+</h3>
+                    <Button
+                      variant={isAdult ? "default" : "outline"}
+                      onClick={handleIsAdultChange}
+                      className={`w-full text-sm ${
+                        isAdult
+                          ? "bg-red-600 text-white hover:bg-red-700"
+                          : "bg-transparent text-white border-gray-600 hover:bg-red-600/20"
+                      }`}
+                    >
+                      {isAdult ? "✓ Bao gồm nội dung 18+" : "Bao gồm nội dung 18+"}
+                    </Button>
                   </div>
                 </div>
 

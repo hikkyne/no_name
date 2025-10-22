@@ -70,6 +70,7 @@ query Media(
   $endDate: FuzzyDateInt
   $season: MediaSeason
   $seasonYear: Int
+  $year: Int
   $type: MediaType
   $format: MediaFormat
   $status: MediaStatus
@@ -149,6 +150,7 @@ query Media(
       endDate: $endDate
       season: $season
       seasonYear: $seasonYear
+      year: $year
       type: $type
       format: $format
       status: $status
